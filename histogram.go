@@ -29,8 +29,8 @@ type Fast struct {
 	rng fastrand.RNG
 }
 
-// New returns new histogram.
-func New() *Fast {
+// NewFast returns new fast histogram.
+func NewFast() *Fast {
 	f := &Fast{}
 	f.Reset()
 	return f
@@ -105,7 +105,7 @@ func (f *Fast) quantile(phi float64) float64 {
 func GetFast() *Fast {
 	v := fastPool.Get()
 	if v == nil {
-		return New()
+		return NewFast()
 	}
 	return v.(*Fast)
 }

@@ -9,7 +9,7 @@ func BenchmarkFastUpdate(b *testing.B) {
 	b.ReportAllocs()
 	b.SetBytes(1)
 	b.RunParallel(func(pb *testing.PB) {
-		f := New()
+		f := NewFast()
 		var v float64
 		for pb.Next() {
 			f.Update(v)
