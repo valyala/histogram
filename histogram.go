@@ -87,6 +87,10 @@ func (f *Fast) Quantile(phi float64) float64 {
 func (f *Fast) Quantiles(dst, phis []float64) []float64 {
 	f.tmp = append(f.tmp[:0], f.a...)
 	sort.Float64s(f.tmp)
+	return f.quantiles(dst, phis)
+}
+
+func (f *Fast) quantiles(dst, phis []float64) []float64 {
 	for _, phi := range phis {
 		q := f.quantile(phi)
 		dst = append(dst, q)
@@ -129,3 +133,37 @@ func PutFast(f *Fast) {
 }
 
 var fastPool sync.Pool
+
+func Quantile(fs []*Fast, phi float64) float64 {
+	t := combine(fs)
+	return t.quantile(phi)
+}
+
+func Quantiles(fs []*Fast, dst, phis []float64) []float64 {
+	t := combine(fs)
+	return t.quantiles(dst, phis)
+}
+
+func combine(fs []*Fast) Fast {
+	n := 0
+	for _, f := range fs {
+		n += len(f.a)
+	}
+
+	var t Fast
+	t.Reset()
+	t.tmp = make([]float64, 0, n)
+
+	for _, f := range fs {
+		t.tmp = append(t.tmp, f.a...)
+		if t.max < f.max {
+			t.max = f.max
+		}
+		if t.min > f.min {
+			t.min = f.min
+		}
+	}
+	sort.Float64s(t.tmp)
+
+	return t
+}

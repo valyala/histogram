@@ -78,3 +78,30 @@ func TestFastRepeatableResults(t *testing.T) {
 		}
 	}
 }
+
+func TestCombine(t *testing.T) {
+	f1 := GetFast()
+	defer PutFast(f1)
+
+	f2 := GetFast()
+	defer PutFast(f2)
+
+	for i := 0; i < 10000; i++ {
+		f1.Update(float64(i))
+	}
+	for i := 10000; i < 20000; i++ {
+		f2.Update(float64(i))
+	}
+
+	q50 := Quantile([]*Fast{f1, f2}, 0.5)
+	if q50 < 9000 || q50 > 11000 {
+		t.Fatal(q50)
+	}
+	qs := Quantiles([]*Fast{f1, f2}, nil, []float64{0, 0.5, 1})
+	if len(qs) != 3 {
+		t.Fatal(len(qs))
+	}
+	if qs[0] != 0 || qs[1] != q50 || qs[2] != 19999 {
+		t.Fatal(qs)
+	}
+}
