@@ -2,6 +2,7 @@
 package histogram
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"sync"
@@ -34,6 +35,48 @@ func NewFast() *Fast {
 	f := &Fast{}
 	f.Reset()
 	return f
+}
+
+// GetState dumps fast histogram state to a map
+func (f *Fast) GetState() map[string]interface{} {
+	return map[string]interface{}{
+		"max":   f.max,
+		"min":   f.min,
+		"count": f.count,
+		"a":     f.a,
+		"tmp":   f.tmp,
+	}
+}
+
+// FromState restores fast histogram state from a map
+func FromState(raw map[string]interface{}) (*Fast, error) {
+	f := &Fast{}
+	if min, ok := raw["min"].(float64); ok {
+		f.min = min
+	} else {
+		return nil, fmt.Errorf("state map value min is of invalid type")
+	}
+	if max, ok := raw["max"].(float64); ok {
+		f.max = max
+	} else {
+		return nil, fmt.Errorf("state map value max is of invalid type")
+	}
+	if count, ok := raw["count"].(uint64); ok {
+		f.count = count
+	} else {
+		return nil, fmt.Errorf("state map value count is of invalid type")
+	}
+	if a, ok := raw["a"].([]float64); ok {
+		f.a = a
+	} else {
+		return nil, fmt.Errorf("state map value a is of invalid type")
+	}
+	if tmp, ok := raw["tmp"].([]float64); ok {
+		f.tmp = tmp
+	} else {
+		return nil, fmt.Errorf("state map value tmp is of invalid type")
+	}
+	return f, nil
 }
 
 // Reset resets the histogram.
